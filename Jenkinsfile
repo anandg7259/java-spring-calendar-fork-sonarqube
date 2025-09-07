@@ -2,8 +2,7 @@ pipeline {
     agent  { label 'suprith2' }   
 
     tools {
-
-jdk 'jdk17'
+        jdk 'jdk17'
         maven 'Maven3'
     }
 
@@ -31,7 +30,7 @@ stage('Deploy to Tomcat') {
             # Move artifact into Tomcat webapps
             ssh ${USER_NAME}@${SERVER_IP} "sudo mv ${TMP_DIR/*.jar} ${TOMCAT_DIR}"
         '''
-    }
-}
+       }
+        }
     }
 }
