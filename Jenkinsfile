@@ -13,11 +13,31 @@ pipeline {
             }
         }
         
-        stage('Deploy to Tomcat') {
+        stage('Deploy to Tomcat1') {
             steps {
                 sh '''
                     WAR_FILE="/home/ubuntu/workspace/Assignment_pipeline/target/*.jar"
                     SERVER_IP="172.31.39.195"
+                    USER_NAME="ubuntu"
+                    TMP_DIR="/tmp/App/"
+                    TOMCAT_DIR="/opt/tomcat/webapps/"
+
+                    # Create temp dir on remote
+                    ssh ${USER_NAME}@${SERVER_IP} "mkdir -p ${TMP_DIR}"
+
+                    # Copy artifact
+                    scp ${WAR_FILE} ${USER_NAME}@${SERVER_IP}:${TMP_DIR}
+
+                    # Move artifact into Tomcat webapps
+                    ssh ${USER_NAME}@${SERVER_IP} "sudo mv ${TMP_DIR}/*.jar ${TOMCAT_DIR}"
+                '''
+            }
+        }
+        stage('Deploy to Tomcat2') {
+            steps {
+                sh '''
+                    WAR_FILE="/home/ubuntu/workspace/Assignment_pipeline/target/*.jar"
+                    SERVER_IP="172.31.44.137"
                     USER_NAME="ubuntu"
                     TMP_DIR="/tmp/App/"
                     TOMCAT_DIR="/opt/tomcat/webapps/"
