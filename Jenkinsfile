@@ -1,48 +1,37 @@
 pipeline {
-    agent any
+    agent  { label 'suprith2' }   
 
     tools {
-        maven 'MAVEN3'   // Jenkins-managed Maven
-        jdk 'jdk17'      // Jenkins-managed JDK
-    }
 
-    environment {
-        SONARQUBE_SERVER = 'My sonarQube'  // must match your SonarQube configuration in Jenkins
+jdk 'jdk17'
+        maven 'Maven3'
     }
 
     stages {
         stage('Build') {
             steps {
-                echo 'Building the project...'
-                sh 'mvn clean install'
+                sh 'mvn clean package -DskipTests'
             }
         }
+stage('Deploy to Tomcat') {
+    steps {
+        sh '''
+            WAR_FILE="/home/ubuntu/workspace/Assignment_pipeline/target/*.jar"
+            SERVER_IP="172.31.39.195"
+            USER_NAME="ubuntu"
+            TMP_DIR="/tmp/App/"
+            TOMCAT_DIR="/opt/tomcat/webapps/"
 
-        stage('SonarQube Analysis') {
-            steps {
-                echo 'Running SonarQube analysis...'
-                withSonarQubeEnv(SONARQUBE_SERVER) {
-                    sh 'mvn sonar:sonar'
-                }
-            }
-        }
+            # Create temp dir on remote
+            ssh ${USER_NAME}@${SERVER_IP} "mkdir -p ${TMP_DIR}"
 
-        stage('Quality Gate') {
-            steps {
-                echo 'Checking SonarQube Quality Gate...'
-                timeout(time: 15, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-    }
+            # Copy artifact
+            scp ${WAR_FILE} ${USER_NAME}@${SERVER_IP}:${TMP_DIR}
 
-    post {
-        success {
-            echo 'Pipeline completed successfully. Check SonarQube report.'
-        }
-        failure {
-            echo 'Pipeline failed. Check logs for errors.'
-        }
-    }
+            # Move artifact into Tomcat webapps
+            ssh ${USER_NAME}@${SERVER_IP} "sudo mv ${TMP_DIR/*.jar} ${TOMCAT_DIR}"
+        '''
+    }
+}
+    }
 }
