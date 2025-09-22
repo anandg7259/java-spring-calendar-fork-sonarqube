@@ -13,16 +13,16 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                echo 'Building the project...'
-                sh 'mvn clean install'
+                echo 'Building the project...'        
+                sh 'mvn clean install'            
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
                 echo 'Running SonarQube analysis...'
-                withSonarQubeEnv(SONARQUBE_SERVER) {
-                    sh 'mvn sonar:sonar'
+                withSonarQubeEnv(SONARQUBE_SERVER) {  
+                    sh 'mvn sonar:sonar'                // Step = Actual code analysis on Jenkins node [fetches the Quality profile rules from sonarqube server]+ sending results to SonarQube.
                 }
             }
         }
@@ -31,7 +31,7 @@ pipeline {
             steps {
                 echo 'Checking SonarQube Quality Gate...'
                 timeout(time: 15, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
+                    waitForQualityGate abortPipeline: true    // Step  = Just waiting for SonarQube’s PASS/FAIL decision (no new analysis).
                 }
             }
         }
