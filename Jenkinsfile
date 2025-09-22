@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        SONARQUBE_SERVER = 'My sonarQube'  // must match your SonarQube configuration in Jenkins
+        SONARQUBE_SERVER = 'My sonarQube'  // Name must match your SonarQube configuration in Jenkins
     }
 
     stages {
